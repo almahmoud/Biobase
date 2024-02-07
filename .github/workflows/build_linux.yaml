@@ -81,8 +81,8 @@ jobs:
         if: matrix.config.type == 'bbs' && steps.deps.outputs.deplist != ''
         name: Multi-cache
         with:
-          keys: ${{steps.deps.outputs.deplist}}
-          paths: ${{steps.common.outputs.librarydir}}
+          keys: "${{steps.deps.outputs.deplist}}"
+          paths: "'${{steps.common.outputs.librarydir}}'"
 
       - name: Run BBS scripts
         if: matrix.config.type == 'bbs'
