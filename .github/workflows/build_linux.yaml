@@ -92,7 +92,7 @@ jobs:
           set -x
           DEPLIST=$(echo "${{steps.deps.outputs.deplist}}" | tr -d "'" | tr ',' '\n')
           DEPREMOVE=$(echo "${{steps.cache.outputs.restored-list}}" | tr ',' '\n')
-          DIFFLIST=$(comm -23 <(echo "$DEPLIST" | sort) <(echo "$DEPREMOVE" | sort) | tr '\n' ',')
+          DIFFLIST=$(comm -23 <(echo "$DEPLIST" | sort) <(echo "$DEPREMOVE" | sort) | tr '\n' ',' | sed 's/,*$//g')
 
           echo difflist=$DIFFLIST >> $GITHUB_OUTPUT
 
