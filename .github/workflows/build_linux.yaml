@@ -93,14 +93,15 @@ jobs:
           DEPLIST=$(echo "${{steps.deps.outputs.deplist}}" | tr -d "'" | tr ',' '\n')
           DEPREMOVE=$(echo "${{steps.cache.outputs.restored-list}}" | tr ',' '\n')
           DIFFLIST=$(comm -23 <(echo "$DEPLIST" | sort) <(echo "$DEPREMOVE" | sort) | tr '\n' ',' | sed 's/,*$//g')
+          if [[ $DIFFLIST == *','* ]]; then DIFFLIST="{${DIFFLIST}}"; fi
 
           echo difflist=$DIFFLIST >> $GITHUB_OUTPUT
 
       - uses: actions/download-artifact@v4
         if: steps.deps.outputs.deplist != '' && matrix.config.type == 'bbs' && steps.artdeps.outputs.difflist != ''
         with:
-          pattern: "{${{steps.artdeps.outputs.difflist}}}"
-          path: "/tmp"
+          pattern: "${{steps.artdeps.outputs.difflist}}"
+          path: "${{steps.common.outputs.librarydir}}/"
 
       - name: Run BBS scripts
         if: matrix.config.type == 'bbs'
@@ -109,9 +110,9 @@ jobs:
         run: |
           set -x
           # Unpack artifacts
-          touch /tmp/tars
-          ls /tmp | grep 'tar.gz$' > /tmp/tars || true
-          if [ -s /tmp/tars ]; then cat /tmp/tars | xargs -i -r tar -xvf {} /; fi
+          # touch /tmp/tars
+          # ls /tmp | grep 'tar.gz$' > /tmp/tars || true
+          # if [ -s /tmp/tars ]; then cat /tmp/tars | xargs -i -r tar -xvf {} /; fi
 
           CONT_ID="${{steps.cont.outputs.id}}"
           cat << "EOF" > /tmp/scripts/run-bbs.sh
@@ -154,7 +155,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: "${{steps.common.outputs.cycleprefix}}${{steps.common.outputs.pkg}}"
-          path: "/tmp/${{steps.common.outputs.pkg}}.tar.gz"
+          path: "${{steps.common.outputs.librarydir}}/${{steps.common.outputs.pkg}}"
 
       - name: Cleanup
         if: matrix.config.type == 'bbs'
